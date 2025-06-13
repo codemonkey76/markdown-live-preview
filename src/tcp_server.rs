@@ -3,10 +3,7 @@ use tokio::{
     net::TcpListener,
 };
 
-use crate::{
-    SharedState,
-    messages::{BufferChangeMessage, CursorMessage, InitMessage, Message},
-};
+use crate::{SharedState, messages::Message};
 
 pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:3001").await?;
@@ -22,31 +19,29 @@ pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
 
             while let Ok(Some(line)) = lines.next_line().await {
                 match serde_json::from_str::<Message>(&line) {
-                    Ok(Message::Init(InitMessage { content, cursor })) => {
-                        let mut s = state.write().unwrap();
-                        s.content = content;
-                        s.cursor = cursor;
-                        println!("✅ Init: {} lines", s.content.len());
-                    }
-                    Ok(Message::BufferChange(BufferChangeMessage { line, new_text })) => {
-                        let mut s = state.write().unwrap();
-                        if line < s.content.len() {
-                            s.content[line] = new_text;
-                        } else {
-                            s.content.push(new_text);
+                    Ok(msg) => {
+                        let mut state = state.write().unwrap();
+                        match &msg {
+                            Message::Init(m) => {
+                                state.content = m.content.clone();
+                                state.cursor = m.cursor;
+                            }
+                            Message::BufferChange(m) => {
+                                if m.line < state.content.len() {
+                                    state.content[m.line] = m.new_text.clone();
+                                } else {
+                                    state.content.push(m.new_text.clone());
+                                }
+                            }
+                            Message::CursorMoved(m) => {
+                                state.cursor = m.cursor;
+                            }
                         }
-                        println!("✏️ Updated line {line}");
-                    }
-                    Ok(Message::CursorMoved(CursorMessage { cursor })) => {
-                        let mut s = state.write().unwrap();
-                        s.cursor = cursor;
-                        println!("👉 Cursor moved to {cursor:?}");
+                        state.messages.push(msg);
                     }
                     Err(e) => eprintln!("❌ Error parsing message: {e}"),
                 }
             }
-
-            println!("🛑 Connection closed");
         });
     }
 }
