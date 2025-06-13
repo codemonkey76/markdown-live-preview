@@ -1102,4 +1102,7 @@
 .markdown-body .highlight pre:has(+.zeroclipboard-container) {
   min-height: 52px;
 }
-
+.cursor-position {
+  background: rgba(255, 0, 0, 0.2);
+  border-bottom: 2px solid red;
+}

@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "event", rename_all = "snake_case")]
+pub enum OutgoingMessage {
+    FullRender { html: String },
+    Pong,
+}
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(tag = "event", content = "data", rename_all = "snake_case")]
 pub enum Message {

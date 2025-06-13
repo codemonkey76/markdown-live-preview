@@ -3,7 +3,7 @@ use tokio::{
     net::TcpListener,
 };
 
-use crate::{SharedState, messages::Message};
+use crate::{SharedState, http_server::render_and_broadcast, messages::Message};
 
 pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:3001").await?;
@@ -11,7 +11,7 @@ pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
 
     loop {
         let (stream, _) = listener.accept().await?;
-        let state = state.clone();
+        let shared_state = state.clone();
 
         tokio::spawn(async move {
             let reader = BufReader::new(stream);
@@ -20,7 +20,8 @@ pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
             while let Ok(Some(line)) = lines.next_line().await {
                 match serde_json::from_str::<Message>(&line) {
                     Ok(msg) => {
-                        let mut state = state.write().unwrap();
+                        let mut state = shared_state.write().unwrap();
+
                         match &msg {
                             Message::Init(m) => {
                                 state.content = m.content.clone();
@@ -37,7 +38,9 @@ pub async fn run_tcp_listener(state: SharedState) -> anyhow::Result<()> {
                                 state.cursor = m.cursor;
                             }
                         }
-                        state.messages.push(msg);
+                        state.messages.push(msg.clone());
+                        drop(state);
+                        render_and_broadcast(&shared_state);
                     }
                     Err(e) => eprintln!("❌ Error parsing message: {e}"),
                 }

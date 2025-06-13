@@ -10,9 +10,12 @@ mod tcp_server;
 
 #[derive(Debug, Default, Serialize)]
 struct AppState {
-    content: Vec<String>,
-    cursor: (usize, usize),
-    messages: Vec<Message>,
+    pub content: Vec<String>,
+    pub cursor: (usize, usize),
+    pub messages: Vec<Message>,
+
+    #[serde(skip_serializing)]
+    pub ws_clients: Vec<tokio::sync::mpsc::UnboundedSender<axum::extract::ws::Message>>,
 }
 
 type SharedState = Arc<RwLock<AppState>>;
