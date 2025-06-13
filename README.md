@@ -1,7 +1,7 @@
-# 🦀 md-live-preview-server
+# 🦀 markdown-live-preview
 
 A Rust-powered live Markdown preview server that integrates with Neovim via TCP.  
-Renders GitHub-flavored Markdown (GFM) using [Comrak](https://github.com/kivikakk/comrak), served via [Axum](https://github.com/tokio-rs/axum), and controlled in real time from an [md-live-preview.nvim](https://github.com/your-username/md-live-preview.nvim) plugin.
+Renders GitHub-flavored Markdown (GFM) using [Comrak](https://github.com/kivikakk/comrak), served via [Axum](https://github.com/tokio-rs/axum), and controlled in real time from an [md-live-preview.nvim](https://github.com/codemonkey76/md-live-preview.nvim) plugin.
 
 > [!NOTE]
 > This project is designed to be paired with a Neovim plugin that streams buffer changes and cursor position.
@@ -34,10 +34,10 @@ Renders GitHub-flavored Markdown (GFM) using [Comrak](https://github.com/kivikak
 ### 🛠 Build and run
 
 ```bash
-git clone https://github.com/your-username/md-live-preview-server
-cd md-live-preview-server
+git clone https://github.com/codemonkey76/markdown-live-preview
+cd markdown-live-preview
 cargo build --release
-./target/release/md-live-preview-server
+./target/release/markdown-live-preview
 ```
 
 ### 🔌 Communication Protocol
@@ -77,7 +77,7 @@ Supported `event` types:
 ## 🛠 Architecture
 
 ```text
-[ Neovim (plugin) ] --> TCP (127.0.0.1:3001) --> [ md-live-preview-server ]
+[ Neovim (plugin) ] --> TCP (127.0.0.1:3001) --> [ markdown-live-preview ]
                                               --> Axum --> HTML preview (localhost:3000)
 ```
 
@@ -86,7 +86,7 @@ Supported `event` types:
 You can log incoming messages using:
 
 ```bash
-RUST_LOG=debug ./target/release/md-live-preview-server
+RUST_LOG=debug ./target/release/markdown-live-preview
 ```
 
 > [!WARNING]
@@ -94,7 +94,7 @@ RUST_LOG=debug ./target/release/md-live-preview-server
 
 ## 📜 License
 
-MIT ©[Shane Poppleton
+MIT © Shane Poppleton
 
 ## 🙏 Acknowledgments
 
